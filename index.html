@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>徐浩 | 3D渲染视觉设计师作品集</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+/* ================= 基础与重置 ================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root { 
+    --black: #0a0a0a; 
+    --white: #f5f4f0; 
+    --galaxy-blue: #0044ff; 
+    --text-dark: #111;
+    --text-light: #fff;
+}
+html { scroll-behavior: smooth; }
+body { 
+    font-family: 'Inter', sans-serif; 
+    background-color: var(--black); 
+    color: var(--text-light); 
+    overflow-x: hidden; 
+    cursor: none; 
+    transition: background-color 0.8s ease, color 0.8s ease;
+}
+
+/* ================= 融合版自定义光标 ================= */
+.cur { position:fixed; width:10px; height:10px; background:#fff; border-radius:50%; pointer-events:none; z-index:10000; transform:translate(-50%,-50%); mix-blend-mode:difference; transition: transform .2s, background-color .2s; }
+.cur-ring { position:fixed; width:40px; height:40px; border:1px solid rgba(255,255,255,.5); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:all .15s ease-out; mix-blend-mode:difference; }
+body.hovering .cur { transform: translate(-50%, -50%) scale(3); background: transparent; border: 1px solid #fff; }
+body.hovering .cur-ring { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+
+/* ================= 银河星辰背景 ================= */
+#galaxy-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; opacity:0.5; transition: opacity 0.8s ease; pointer-events: none; }
+body.light-theme #galaxy-canvas { opacity: 0 !important; }
+
+/* ================= 导航栏 ================= */
+nav { position:fixed; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:30px 50px; z-index:200; mix-blend-mode:difference; color: #fff; transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+nav.nav-hidden { transform: translateY(-110%); }
+.logo-wrap { display:flex; align-items:center; gap:5px; }
+.logo-badge { width:45px; height:45px; border:1px solid rgba(255,255,255,.5); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; letter-spacing:.08em; }
+.nav-links { display:flex; gap:40px; list-style:none; }
+.nav-links a { font-size:12px; color:rgba(255,255,255,.8); text-decoration:none; letter-spacing:.04em; transition:color .2s; text-transform:uppercase; font-weight: 500;}
+.nav-links a:hover { color:var(--galaxy-blue); }
+
+/* ================= 全局滚动浮现动效 ================= */
+.fade-up { opacity: 0; transform: translateY(40px); transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* ================= 各个大屏的基础样式 ================= */
+.section-hero { position:relative; height:100vh; min-height:700px; overflow:hidden; display:flex; align-items:center; z-index:5; padding-left: 50px; }
+.hero-img-container { position:absolute; right:0; top:0; width:60%; height:100%; z-index:2; overflow:hidden; mask-image: linear-gradient(to left, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 60%, transparent 100%); }
+.hero-img { width: 100%; height: 100%; object-fit: cover; filter: drop-shadow(0 0 50px rgba(0,68,255,0.2)); transition: filter 0.5s ease; will-change: filter; }
+.hero-img.water-active { filter: url(#hero-water-filter) drop-shadow(0 0 60px rgba(0,68,255,0.35)); }
+.hero-text { position:relative; z-index:10; }
+.hero-role { font-size:14px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; line-height:1.5; color: var(--galaxy-blue); }
+.hero-role small { display:block; font-weight:300; font-size:12px; color:rgba(255,255,255,.6); letter-spacing:.08em; margin-top:5px; }
+.section-hero h1 { font-size: 8vw; font-weight: 900; line-height: 0.85; letter-spacing: -0.04em; margin: 25px 0; }
+.hero-marq { position:absolute; bottom:0; left:0; right:0; overflow:hidden; height:80px; z-index:10; background: rgba(10,10,10,0.4); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); }
+.marq-track { display:flex; width:max-content; animation:marqS 20s linear infinite; align-items: center; height: 100%; }
+.marq-item { font-size:60px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; color:transparent; -webkit-text-stroke:1px rgba(255,255,255,.15); white-space:nowrap; padding:0 2rem; }
+@keyframes marqS { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+.section-about { min-height: 100vh; padding: 150px 50px; display: flex; align-items: center; position: relative; z-index: 10; }
+.about-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; width: 100%; align-items: start; }
+.huge-text { font-size: 7.5vw; font-weight: 900; line-height: 0.9; letter-spacing: -0.03em; position: sticky; top: 150px; }
+.about-desc { font-size: 16px; line-height: 1.8; font-weight: 400; margin-bottom: 40px; }
+.exp-container { display: flex; flex-direction: column; gap: 40px; margin-bottom: 40px; }
+.exp-item { display: flex; flex-direction: column; gap: 15px; }
+.exp-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-weight: 700; font-size: 20px; }
+.exp-time { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 400; opacity: 0.6; }
+.exp-content { display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.7; opacity: 0.85; }
+.stats-container { display: flex; flex-direction: column; gap: 25px; }
+.stat-item { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.15); padding-bottom: 15px; font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 600; }
+body:not(.light-theme) .stat-item { border-bottom-color: rgba(255,255,255,0.15); }
+.skill-tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.skill-tag { padding: 6px 16px; border-radius: 50px; border: 1px solid rgba(0,0,0,0.2); font-size: 12px; font-weight: 500; }
+body:not(.light-theme) .skill-tag { border-color: rgba(255,255,255,0.2); }
+
+.section-circular { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; z-index: 10; background-color: #f7f5f0;}
+#circleBox { width: 35vw; height: 35vw; border-radius: 50%; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; animation: circleShrink 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; clip-path: circle(100vw at center); transform-origin: center; cursor: pointer;}
+.circle-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('你的纹理图片地址.jpg') center/cover no-repeat; background-color: #000; z-index: 1; }
+.circle-text { position: relative; z-index: 2; color: #fff; font-size: 3vw; font-weight: 700; letter-spacing: 1px; animation: textFadeIn 1.2s ease 0.6s forwards; opacity: 0; mix-blend-mode: difference; }
+@keyframes circleShrink { 0% { clip-path: circle(100vw at center); transform: scale(1.2); } 100% { clip-path: circle(17.5vw at center); transform: scale(1); } }
+@keyframes textFadeIn { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+#circleBox:hover { animation: circleHoverShrink 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+@keyframes circleHoverShrink { 0% { clip-path: circle(17.5vw at center); transform: scale(1); } 100% { clip-path: circle(16vw at center); transform: scale(0.95); } }
+
+.section-gallery { padding: 150px 0; overflow: hidden; position: relative; z-index: 10; }
+.gallery-title { text-align: center; font-size: 5vw; font-weight: 900; margin-bottom: 80px; letter-spacing: -0.03em; }
+.gallery-track { display: flex; gap: 40px; padding: 0 50vw 0 50px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.gallery-track::-webkit-scrollbar { display: none; }
+.gallery-item { min-width: 350px; height: 500px; border-radius: 16px; scroll-snap-align: center; transition: transform 0.4s ease; position: relative; overflow: hidden; background: #1a1a1a; display: flex; align-items: flex-end; padding: 30px; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+.gallery-item:hover { transform: translateY(-20px); border-color: rgba(255,255,255,0.2); }
+.g-tag { font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 8px; display: block; }
+.g-title { font-size: 28px; font-weight: 800; }
+
+.section-grid { padding: 150px 50px; position: relative; z-index: 10; background: var(--black); }
+.grid-title { font-size: 4.5vw; font-weight: 900; margin-bottom: 60px; letter-spacing: -0.03em; text-align: center; }
+.work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 30px; }
+/* 将这里的 height: 450px 改为 aspect-ratio: 1 / 1 实现等比正方形 */
+.grid-item { border-radius: 12px; overflow: hidden; aspect-ratio: 1 / 1; position: relative; transition: transform 0.4s ease; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+.grid-item:hover { transform: scale(1.02); border-color: rgba(255,255,255,0.2); }
+.grid-item-img { width: 100%; height: 100%; object-fit: cover; transition: filter 0.3s ease; }
+.grid-item:hover .grid-item-img { filter: brightness(0.8); }
+.grid-item-text { position: absolute; bottom: 0; left: 0; right: 0; padding: 25px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+
+.section-slider { min-height: 100vh; padding: 100px 50px; position: relative; z-index: 10; background: var(--white); color: var(--text-dark); }
+.slider-title { font-size: 4.5vw; font-weight: 900; margin-bottom: 40px; letter-spacing: -0.03em; text-align: center; }
+.slider-container { position: relative; height: 70vh; overflow: hidden; border-radius: 20px; }
+.slider-track { display: flex; height: 100%; transition: transform 0.6s ease; }
+.slider-item { min-width: 100%; height: 100%; position: relative; }
+.slider-item-img { width: 100%; height: 100%; object-fit: cover; }
+.slider-item-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white; mix-blend-mode: difference; }
+.slider-item-tag { font-family: 'Space Mono', monospace; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+.slider-item-title { font-size: 4vw; font-weight: 900; line-height: 1.1; }
+.slider-nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 10; }
+.slider-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background 0.3s ease; }
+.slider-dot.active { background: white; }
+
+.section-split { padding: 150px 50px; position: relative; z-index: 10; background: var(--black); }
+.split-title { font-size: 4.5vw; font-weight: 900; margin-bottom: 60px; letter-spacing: -0.03em; text-align: center; }
+.split-container { display: flex; flex-direction: column; gap: 80px; }
+.split-item { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.split-item-reverse { grid-template-columns: 1fr 1fr; }
+.split-img { width: 100%; height: 500px; border-radius: 16px; object-fit: cover; transition: transform 0.4s ease; }
+.split-item:hover .split-img { transform: scale(1.03); }
+.split-text { padding: 0 20px; }
+.split-tag { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--galaxy-blue); margin-bottom: 15px; }
+.split-heading { font-size: 3vw; font-weight: 800; line-height: 1.2; margin-bottom: 20px; }
+.split-desc { font-size: 16px; line-height: 1.8; opacity: 0.8; max-width: 450px; }
+.split-btn { display: inline-block; margin-top: 25px; padding: 12px 24px; border: 1px solid var(--galaxy-blue); border-radius: 4px; color: var(--galaxy-blue); text-decoration: none; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 1px; transition: all 0.3s ease; cursor: pointer; }
+.split-btn:hover { background: var(--galaxy-blue); color: white; }
+
+footer { padding: 120px 50px; text-align: center; position: relative; z-index: 10; }
+.cta-text { font-size: 5vw; font-weight: 900; line-height: 1.1; margin-bottom: 40px; }
+.cta-email { font-size: 2.5vw; text-decoration: none; color: var(--galaxy-blue); font-weight: 700; position: relative; transition: color 0.3s; }
+.cta-email::after { content: ''; position: absolute; width: 100%; height: 2px; background: currentColor; bottom: -5px; left: 0; transform: scaleX(0); transform-origin: right; transition: transform 0.4s ease; }
+.cta-email:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* ================= 作品详情模态框 (二级页面) ================= */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 9998; display: none; align-items: flex-start; justify-content: center; padding: 50px; overflow-y: auto; }
+.modal.active { display: flex; }
+.modal-content { width: 100%; max-width: 900px; background: var(--black); border-radius: 20px; padding: 60px; position: relative; border: 1px solid rgba(255,255,255,0.1); z-index: 9999; margin: auto; }
+.modal-close { position: fixed; top: 30px; right: 40px; font-size: 28px; color: white; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; z-index: 10001; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; }
+.modal-close:hover { color: var(--galaxy-blue); border-color: var(--galaxy-blue); transform: rotate(90deg); }
+.modal-header { margin-bottom: 40px; }
+.modal-tag { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--galaxy-blue); margin-bottom: 10px; }
+.modal-title { font-size: clamp(28px, 3vw, 48px); font-weight: 900; line-height: 1.2; }
+
+/* ================= 模态框图片轮播 ================= */
+.modal-carousel-wrap { position: relative; margin: 40px 0 0; user-select: none; }
+
+.modal-gallery {
+    position: relative; width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden; border-radius: 16px;
+    background: #111; cursor: zoom-in;
+}
+.modal-gallery::after {
+    content: '点击放大 ↗';
+    position: absolute; bottom: 14px; right: 14px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.05em;
+    padding: 6px 12px; border-radius: 20px;
+    opacity: 0; transition: opacity 0.25s ease;
+    pointer-events: none; z-index: 5;
+}
+.modal-gallery:hover::after { opacity: 1; }
+
+.modal-slide {
+    position: absolute; inset: 0;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    transform: translateX(40px);
+}
+.modal-slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+.modal-slide.leaving { opacity: 0; transform: translateX(-40px); }
+
+.modal-img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 14px; }
+
+.carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18);
+    color: #fff; font-size: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s, border-color 0.2s, opacity 0.25s;
+    z-index: 10; opacity: 0; backdrop-filter: blur(4px);
+}
+.modal-carousel-wrap:hover .carousel-btn { opacity: 1; }
+.carousel-btn:hover { background: rgba(0,68,255,0.55); border-color: var(--galaxy-blue); }
+.carousel-btn-prev { left: 14px; }
+.carousel-btn-next { right: 14px; }
+
+.carousel-counter {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    padding: 5px 11px; border-radius: 20px; z-index: 10;
+    pointer-events: none;
+}
+
+.carousel-dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+.carousel-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.25); cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+.carousel-dot.active { background: var(--galaxy-blue); transform: scale(1.35); }
+
+.carousel-thumbs {
+    display: flex; gap: 10px; margin-top: 12px;
+    overflow-x: auto; scrollbar-width: none; padding-bottom: 4px;
+}
+.carousel-thumbs::-webkit-scrollbar { display: none; }
+.carousel-thumb {
+    min-width: 80px; height: 56px; border-radius: 8px; overflow: hidden;
+    cursor: pointer; border: 2px solid transparent;
+    transition: border-color 0.25s, opacity 0.25s;
+    opacity: 0.45; flex-shrink: 0;
+}
+.carousel-thumb.active { border-color: var(--galaxy-blue); opacity: 1; }
+.carousel-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.modal-desc { font-size: 16px; line-height: 1.8; max-width: 800px; margin-bottom: 40px; opacity: 0.9; }
+.modal-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); }
+.modal-info-item { font-family: 'Space Mono', monospace; font-size: 14px; }
+.modal-info-label { opacity: 0.6; margin-bottom: 8px; }
+
+/* ================= 灯箱（支持缩放拖拽全家桶） ================= */
+.lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.97);
+    z-index: 99999;
+    display: none; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+.lightbox.active { display: flex; }
+
+#lbZoomArea {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: grab;
+    touch-action: none; /* 必须，阻止移动端默认的页面滚动与缩放 */
+}
+#lbZoomArea:active { cursor: grabbing; }
+
+.lightbox-img {
+    /* 不限制尺寸，让图片以原始像素渲染，放大时不模糊 */
+    width: auto; height: auto;
+    max-width: none; max-height: none;
+    border-radius: 6px;
+    box-shadow: 0 0 80px rgba(0,0,0,0.8);
+    user-select: none; -webkit-user-drag: none;
+    transform-origin: center center;
+    will-change: transform;
+    pointer-events: auto;
+    display: block;
+}
+
+.lightbox-close { position: fixed; top: 24px; right: 32px; font-size: 28px; color: #fff; cursor: pointer; z-index: 100000; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; transition: border-color 0.2s, transform 0.2s; }
+.lightbox-close:hover { border-color: var(--galaxy-blue); color: var(--galaxy-blue); transform: rotate(90deg); }
+.lightbox-counter { position: fixed; bottom: 52px; left: 50%; transform: translateX(-50%); font-family: 'Space Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.1em; z-index: 100000; pointer-events: none; }
+.lightbox-prev, .lightbox-next { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 20px; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, border-color 0.2s; z-index: 100000; }
+.lightbox-prev { left: 24px; }
+.lightbox-next { right: 24px; }
+.lightbox-prev:hover, .lightbox-next:hover { background: rgba(0,68,255,0.3); border-color: var(--galaxy-blue); }
+
+.lb-zoom-hint {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: rgba(255,255,255,0.22); letter-spacing: 0.12em;
+    z-index: 100000; pointer-events: none; white-space: nowrap;
+}
+.lb-scale-badge {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.1em;
+    background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 20px;
+    z-index: 100000; pointer-events: none;
+    opacity: 0; transition: opacity 0.3s;
+}
+.lb-scale-badge.visible { opacity: 1; }
+
+/* ================= 页面加载遮罩 ================= */
+#page-loader {
+    position: fixed; inset: 0; background: #0a0a0a;
+    z-index: 99999; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-num {
+    font-family: 'Space Mono', monospace; font-size: clamp(48px, 8vw, 96px);
+    font-weight: 700; color: #fff; letter-spacing: -0.04em; line-height: 1;
+    overflow: hidden;
+}
+.loader-bar-wrap {
+    width: 200px; height: 1px; background: rgba(255,255,255,0.1); position: relative;
+}
+.loader-bar {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: var(--galaxy-blue); width: 0%;
+    transition: width 0.05s linear;
+}
+.loader-label {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    color: rgba(255,255,255,0.3); letter-spacing: 0.2em; text-transform: uppercase;
+}
+
+/* ================= 滚动进度条 ================= */
+#scroll-progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--galaxy-blue); width: 0%;
+    z-index: 9999; pointer-events: none;
+    transform-origin: left;
+    box-shadow: 0 0 8px rgba(0,68,255,0.6);
+}
+
+/* ================= 光标文字模式 ================= */
+.cur-label {
+    position: fixed; pointer-events: none; z-index: 10001;
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: #fff; transform: translate(-50%, -50%);
+    opacity: 0; transition: opacity 0.2s ease;
+    white-space: nowrap;
+}
+body.cursor-view .cur { transform: translate(-50%,-50%) scale(5); background: transparent; border: 1px solid rgba(255,255,255,0.6); }
+body.cursor-view .cur-ring { opacity: 0; }
+body.cursor-view .cur-label { opacity: 1; }
+
+/* ================= 3D Tilt 卡片 ================= */
+.tilt-card { transform-style: preserve-3d; will-change: transform; }
+.tilt-card .tilt-shine {
+    position: absolute; inset: 0; border-radius: inherit;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.12) 0%, transparent 65%);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    z-index: 20;
+}
+.tilt-card:hover .tilt-shine { opacity: 1; }
+
+/* ================= 模态框入场动画 ================= */
+.modal { opacity: 0; transition: opacity 0.35s ease; }
+.modal.active { opacity: 1; }
+.modal-content {
+    transform: scale(0.94) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s ease;
+    opacity: 0;
+}
+.modal.active .modal-content { transform: scale(1) translateY(0); opacity: 1; }
+
+/* ================= 分字动画 ================= */
+.split-char {
+    display: inline-block;
+    opacity: 0; transform: translateY(60px) rotate(8deg);
+    transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.split-char.in { opacity: 1; transform: translateY(0) rotate(0deg); }
+
+/* ================= 磁吸按钮 ================= */
+.mag-btn { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+
+/* 响应式调整 */
+@media(max-width:900px){
+  .hero-img-container { width:100%; opacity:0.3; mask-image: none; -webkit-mask-image: none; }
+  .section-hero { padding-left: 30px; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .huge-text { position: static; font-size: 12vw; }
+  .circle-mask { width: 60vw; height: 60vw; }
+  .circle-mask img { transform: translate(-20vw, -20vh); }
+  .work-grid { grid-template-columns: 1fr; }
+  .split-item, .split-item-reverse { grid-template-columns: 1fr; }
+  .split-heading { font-size: 5vw; }
+  .modal-content { padding: 30px; }
+  .modal-title { font-size: 5vw; }
+  .modal-gallery { aspect-ratio: 3/2; }
+  .carousel-btn { width: 36px; height: 36px; font-size: 14px; }
+  .modal-info { grid-template-columns: 1fr; }
+  .slider-item-title { font-size: 6vw; }
+  .exp-header { flex-direction: column; align-items: flex-start; }
+  #circleBox { width: 60vw; height: 60vw; }
+  .circle-text { font-size: 5vw; }
+  @keyframes circleShrink { 0% { clip-path: circle(100vw at center); transform: scale(1.2); } 100% { clip-path: circle(30vw at center); transform: scale(1); } }
+  @keyframes circleHoverShrink { 0% { clip-path: circle(30vw at center); transform: scale(1); } 100% { clip-path: circle(27vw at center); transform: scale(0.95); } }
+  .lightbox-prev { left: 16px; }
+  .lightbox-next { right: 16px; }
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- 页面加载遮罩 -->
+<div id="page-loader">
+  <div class="loader-num" id="loaderNum">0</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+  <div class="loader-label">Loading Portfolio</div>
+</div>
+
+<!-- 滚动进度条 -->
+<div id="scroll-progress"></div>
+
+<!-- 光标文字标签 -->
+<div class="cur-label" id="curLabel">OPEN</div>
+
+<!-- 光标与背景 -->
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="ring"></div>
+<canvas id="galaxy-canvas"></canvas>
+
+<!-- 导航栏 -->
+<nav>
+  <div class="logo-wrap">
+    <div class="logo-badge">XH</div>
+    <span style="font-weight: 800; letter-spacing: 2px; font-size: 14px;">XU HAO</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#hero" class="hover-target mag-btn">首页</a></li>
+    <li><a href="#about" class="hover-target mag-btn">关于</a></li>
+    <li><a href="#works" class="hover-target mag-btn">作品</a></li>
+  </ul>
+</nav>
+
+<!-- 屏1：Hero视觉 -->
+<section class="section-hero" id="hero" data-bg="dark">
+  <div class="hero-img-container">
+    <img src="images/my-hero.jpg" alt="3D渲染视觉展示" class="hero-img" id="hero-pic">
+  </div>
+  <div class="hero-text">
+    <div class="hero-role fade-up">
+      3D渲染师 & 视觉设计师
+      <small>杭州 / 动漫制作技术专业</small>
+    </div>
+    <h1 class="fade-up" style="transition-delay: 0.1s;">3D<br>VISION</h1>
+    <div class="fade-up" style="transition-delay: 0.2s;">
+        <a href="#works" class="hover-target" style="color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 4px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 1px;">查看作品 ↓</a>
+    </div>
+  </div>
+  <div class="hero-marq">
+    <div class="marq-track" id="hm">
+      <div class="marq-item">3D产品渲染</div><div class="marq-item" style="color: #fff; -webkit-text-stroke: 0;">✦</div>
+      <div class="marq-item">美妆视觉设计</div><div class="marq-item" style="color: #fff; -webkit-text-stroke: 0;">✦</div>
+      <div class="marq-item">商业三维可视化</div><div class="marq-item" style="color: #fff; -webkit-text-stroke: 0;">✦</div>
+    </div>
+  </div>
+</section>
+
+<!-- 屏2：个人介绍屏 -->
+<section class="section-about" id="about" data-bg="light">
+  <div class="about-grid">
+      <div class="huge-text fade-up">3D渲染<br>视觉设计<br>商业美学</div>
+      <div class="fade-up" style="transition-delay: 0.1s;">
+          <p class="about-desc">
+              徐浩 / 26岁 / 动漫制作技术专业<br>
+              深耕商业3D渲染与美妆护肤产品三维可视化，擅长产品精准建模、专属材质调试、电影级商业布光，具备从需求对接、全流程渲染到视觉落地的完整项目经验，可独立完成产品三维内容与商业视觉设计全链路工作。
+          </p>
+          <div class="exp-container">
+              <div class="exp-item">
+                  <div class="exp-header">
+                      <span>梦尔达科技（杭州）有限公司</span>
+                      <span class="exp-time">2025.4 - 2026.6</span>
+                  </div>
+                  <div class="exp-content">
+                      <span>1. 对接品牌与设计团队，明确美妆视觉需求，完成护肤等产品的三维建模。</span>
+                      <span>2. 调试美妆专属材质质感，完成商业布光与场景搭建，制作产品静帧、动效等三维渲染内容。</span>
+                      <span>3. 输出多渠道渲染素材，配合后期优化视觉效果，迭代渲染流程。</span>
+                      <span>4. 完成节日营销海报、活动页设计。</span>
+                  </div>
+              </div>
+              <div class="exp-item">
+                  <div class="exp-header">
+                      <span>杭州蛛丝马迹网络科技有限公司</span>
+                      <span class="exp-time">2023.9 - 2025.4</span>
+                  </div>
+                  <div class="exp-content">
+                      <span>1. 负责项目3D场景、模型的渲染制作，确保渲染画面高清、质感达标。</span>
+                      <span>2. 配合建模、设计团队，对接需求细节，根据反馈修改渲染效果。</span>
+                      <span>3. 负责渲染素材的整理、归档，规范渲染文件命名和存储逻辑。</span>
+                      <span>4. 关注行业渲染技术和软件更新，主动优化渲染流程。</span>
+                  </div>
+              </div>
+          </div>
+          <div class="stats-container">
+              <div class="stat-item"><span>从业年限</span><span>4年+</span></div>
+              <div class="stat-item"><span>渲染精度</span><span>4K-8K 电影级</span></div>
+              <div class="stat-item"><span>核心领域</span><span>美妆护肤 / 产品3D可视化</span></div>
+          </div>
+          <div class="skill-tags">
+              <span class="skill-tag">Cinema 4D</span>
+              <span class="skill-tag">Photoshop</span>
+              <span class="skill-tag">After Effects</span>
+              <span class="skill-tag">Illustrator</span>
+              <span class="skill-tag">Keyshot</span>
+              <span class="skill-tag">Xd</span>
+          </div>
+      </div>
+  </div>
+</section>
+
+<!-- 屏3：圆形遮罩屏 -->
+<section class="section-circular fade-up" id="circular" data-bg="light">
+    <div class="circle-mask" id="circleBox">
+        <div class="circle-bg"></div>
+        <h2 class="circle-text">质感决定价值</h2>
+    </div>
+</section>
+
+<!-- 屏4：横向画廊 -->
+<section class="section-gallery" id="works" data-bg="dark">
+  <h2 class="gallery-title fade-up">精选作品</h2>
+  <div class="gallery-track fade-up" style="transition-delay: 0.2s;">
+      <div class="gallery-item hover-target work-item tilt-card" data-work="zsea" style="background: linear-gradient(to bottom, transparent, #000), url('images/zsea-cover.jpg') center/cover;">
+          <div class="tilt-shine"></div>
+          <div>
+              <span class="g-tag">护肤产品渲染</span>
+              <div class="g-title">Z:SEA 海洋系列</div>
+          </div>
+      </div>
+      <div class="gallery-item hover-target work-item tilt-card" data-work="sdx" style="background: linear-gradient(to bottom, transparent, #000), url('images/sdx-cover.jpg') center/cover;">
+          <div class="tilt-shine"></div>
+          <div>
+              <span class="g-tag">美妆产品渲染</span>
+              <div class="g-title">SDX 泥膜系列</div>
+          </div>
+      </div>
+      <div class="gallery-item hover-target work-item tilt-card" data-work="grooming" style="background: linear-gradient(to bottom, transparent, #000), url('images/grooming-cover.jpg') center/cover;">
+          <div class="tilt-shine"></div>
+          <div>
+              <span class="g-tag">个护产品渲染</span>
+              <div class="g-title">男士护理套装</div>
+          </div>
+      </div>
+      <div class="gallery-item" style="background: #111; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+          <span style="color: rgba(255,255,255,0.3); font-family: 'Space Mono';">更多作品更新中</span>
+      </div>
+  </div>
+</section>
+
+<!-- 网格布局作品区 (6个正方形布局) -->
+<section class="section-grid fade-up" data-bg="dark">
+  <h2 class="grid-title">网格布局作品</h2>
+  <div class="work-grid">
+      <div class="grid-item hover-target work-item tilt-card" data-work="grid1">
+          <div class="tilt-shine"></div>
+          <img src="images/grid1.jpg" alt="香水产品渲染" class="grid-item-img">
+          <div class="grid-item-text">
+              <span class="g-tag">产品可视化</span>
+              <div class="g-title">高端香水系列</div>
+          </div>
+      </div>
+      <div class="grid-item hover-target work-item tilt-card" data-work="grid2">
+          <div class="tilt-shine"></div>
+          <img src="images/grid2.jpg" alt="智能产品UI" class="grid-item-img">
+          <div class="grid-item-text">
+              <span class="g-tag">UX/UI设计</span>
+              <div class="g-title">智能产品界面</div>
+          </div>
+      </div>
+      <div class="grid-item hover-target work-item tilt-card" data-work="grid3">
+          <div class="tilt-shine"></div>
+          <img src="images/grid3.jpg" alt="化妆品包装" class="grid-item-img">
+          <div class="grid-item-text">
+              <span class="g-tag">包装设计</span>
+              <div class="g-title">有机彩妆系列</div>
+          </div>
+      </div>
+      <div class="grid-item hover-target work-item tilt-card" data-work="grid4">
+          <div class="tilt-shine"></div>
+          <img src="images/grid4.jpg" alt="个护产品渲染" class="grid-item-img">
+          <div class="grid-item-text">
+              <span class="g-tag">3D渲染</span>
+              <div class="g-title">个护产品概念设计</div>
+          </div>
+      </div>
+      <div class="grid-item hover-target work-item tilt-card" data-work="grid5">
+          <div class="tilt-shine"></div>
+          <img src="images/grid5.jpg" alt="三维字体创意" class="grid-item-img">
+          <div class="grid-item-text">
+              <span class="g-tag">材质表现</span>
+              <div class="g-title">三维字体创意</div>
+          </div>
+      </div>
+      <div class="grid-item hover-target work-item tilt-card" data-work="grid6">
+          <div class="tilt-shine"></div>
+          <img src="images/grid6.jpg" alt="品牌快闪店概念" class="grid-item-img">
+          <div class="grid-item-text">
+              <span class="g-tag">空间设计</span>
+              <div class="g-title">品牌快闪店概念</div>
+          </div>
+      </div>
+  </div>
+</section>
+
+<!-- 全屏轮播作品区 -->
+<section class="section-slider fade-up" data-bg="light">
+  <h2 class="slider-title">全屏轮播作品</h2>
+  <div class="slider-container">
+      <div class="slider-track" id="sliderTrack">
+          <div class="slider-item">
+              <img src="images/slider1.jpg" alt="" class="slider-item-img">
+              <div class="slider-item-text">
+                  <div class="slider-item-tag"></div>
+                  <div class="slider-item-title"></div>
+              </div>
+          </div>
+          <div class="slider-item">
+              <img src="images/slider2.jpg" alt="" class="slider-item-img">
+              <div class="slider-item-text">
+                  <div class="slider-item-tag"></div>
+                  <div class="slider-item-title"></div>
+              </div>
+          </div>
+          <div class="slider-item">
+              <img src="images/slider3.jpg" alt="" class="slider-item-img">
+              <div class="slider-item-text">
+                  <div class="slider-item-tag"></div>
+                  <div class="slider-item-title"></div>
+              </div>
+          </div>
+      </div>
+      <div class="slider-nav">
+          <div class="slider-dot active" data-index="0"></div>
+          <div class="slider-dot" data-index="1"></div>
+          <div class="slider-dot" data-index="2"></div>
+      </div>
+  </div>
+</section>
+
+<!-- 左右分栏作品区 -->
+<section class="section-split fade-up" data-bg="dark">
+  <h2 class="split-title">分栏布局作品</h2>
+  <div class="split-container">
+      <div class="split-item">
+          <img src="images/split1.jpg" alt="咖啡品牌设计" class="split-img">
+          <div class="split-text">
+              <div class="split-tag">品牌设计</div>
+              <div class="split-heading">个护品牌全案设计</div>
+              <div class="split-desc">
+                  从品牌定位出发，完成产品包装设计、三维渲染、电商视觉全链路落地，打造符合年轻群体审美的高端个护品牌视觉体系。
+              </div>
+              <div class="split-btn hover-target work-item" data-work="split1">查看详情</div>
+          </div>
+      </div>
+      <div class="split-item split-item-reverse">
+          <div class="split-text">
+              <div class="split-tag">3D可视化</div>
+              <div class="split-heading">美妆产品动画渲染</div>
+              <div class="split-desc">
+                  为美妆新品打造全流程三维动画，从产品结构拆解、材质质感表现到动态光影设计，完整呈现产品核心卖点与高端质感。
+              </div>
+              <div class="split-btn hover-target work-item" data-work="split2">查看详情</div>
+          </div>
+          <img src="images/split2.jpg" alt="美妆产品渲染" class="split-img">
+      </div>
+  </div>
+</section>
+
+<!-- 底部CTA -->
+<footer data-bg="dark">
+  <div class="cta-text fade-up" id="ctaText">合作咨询</div>
+  <a href="tel:13576087594" class="cta-email fade-up hover-target" style="transition-delay: 0.1s;">13576087594</a>
+  <div style="margin-top: 80px; font-family: 'Space Mono'; font-size: 10px; opacity: 0.3; letter-spacing: 2px;">© 2026 徐浩 3D视觉设计作品集. 保留所有权利.</div>
+</footer>
+
+<!-- ================= 作品详情模态框 (二级页面) ================= -->
+<div class="modal" id="workModal">
+  <div class="modal-content">
+      <div class="modal-close hover-target" id="modalClose">×</div>
+      <div class="modal-header">
+          <div class="modal-tag" id="modalTag">作品分类</div>
+          <div class="modal-title" id="modalTitle">作品名称</div>
+      </div>
+      
+      <!-- 图片轮播区域 -->
+      <div class="modal-carousel-wrap">
+        <div class="modal-gallery" id="modalGallery">
+          <!-- slides injected by JS -->
+        </div>
+        <div class="carousel-counter" id="carouselCounter">1 / 1</div>
+        <button class="carousel-btn carousel-btn-prev hover-target" id="carouselPrev">←</button>
+        <button class="carousel-btn carousel-btn-next hover-target" id="carouselNext">→</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+        <div class="carousel-thumbs" id="carouselThumbs"></div>
+      </div>
+
+      <div class="modal-desc" id="modalDesc">
+          作品详细描述，包含设计理念、制作流程、技术难点、落地效果等内容，完整呈现项目全流程。
+      </div>
+      <div class="modal-info">
+          <div class="modal-info-item">
+              <div class="modal-info-label">客户</div>
+              <div id="modalClient">品牌方</div>
+          </div>
+          <div class="modal-info-item">
+              <div class="modal-info-label">服务内容</div>
+              <div id="modalServices">3D渲染 / 视觉设计</div>
+          </div>
+          <div class="modal-info-item">
+              <div class="modal-info-label">年份</div>
+              <div id="modalYear">2025</div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- 水波纹 SVG 滤镜 -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+  <defs>
+    <filter id="hero-water-filter" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
+      <feTurbulence id="wt" type="fractalNoise" baseFrequency="0.009 0.006" numOctaves="3" seed="12" result="noise"/>
+      <feDisplacementMap id="wdm" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ================= 灯箱查看器（全新支持缩放、拖拽交互） ================= -->
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-close hover-target" id="lbClose">×</div>
+    <div class="lightbox-prev hover-target" id="lbPrev">←</div>
+    
+    <!-- 缩放与平移区域 -->
+    <div id="lbZoomArea">
+        <img src="" alt="放大图片" class="lightbox-img" id="lbImg">
+    </div>
+
+    <div class="lightbox-next hover-target" id="lbNext">→</div>
+    <div class="lightbox-counter" id="lbCounter">1 / 1</div>
+    <div class="lb-zoom-hint">滚轮缩放 / 拖拽平移 / 触摸捏合 / 双击重置</div>
+    <div class="lb-scale-badge" id="lbScaleBadge">100%</div>
+</div>
+
+<script>
+// ================= 1. 自定义光标逻辑 =================
+const cur = document.getElementById('cur'), ring = document.getElementById('ring');
+let mx=0, my=0, rx=0, ry=0;
+
+document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+    cur.style.display = 'block';
+    ring.style.display = 'block';
+});
+
+(function loop(){
+    rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(loop);
+})();
+
+function bindHoverTargets() {
+    document.querySelectorAll('.hover-target').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            document.body.classList.add('hovering');
+        });
+        el.addEventListener('mouseleave', () => {
+            document.body.classList.remove('hovering');
+        });
+    });
+}
+bindHoverTargets();
+
+// ================= 2. 银河背景逻辑 =================
+const canvas = document.getElementById('galaxy-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; stars = []; for(let i=0; i<150; i++) { stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, s: Math.random() * 1.5, o: Math.random() }); } }
+function drawStars() { ctx.clearRect(0, 0, canvas.width, canvas.height); stars.forEach(s => { ctx.fillStyle = `rgba(255,255,255,${s.o})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI * 2); ctx.fill(); s.o += (Math.random() - 0.5) * 0.02; s.o = Math.max(0, Math.min(1, s.o)); }); requestAnimationFrame(drawStars); }
+initStars(); drawStars(); window.addEventListener('resize', initStars);
+
+// ================= 3. 人物图片水波纹效果 =================
+(function () {
+    const heroImg = document.getElementById('hero-pic'), heroContainer = document.querySelector('.hero-img-container'), feTurb = document.getElementById('wt'), feDisp = document.getElementById('wdm');
+    if (!heroImg || !feTurb || !feDisp) return;
+    const MAX_SCALE = 42, BASE_FX = 0.009, BASE_FY = 0.006, DRIFT = 0.0022, ENTER_LERP = 0.055, LEAVE_LERP = 0.020, MOVE_COEF = 0.55, MOVE_CAP = 18;
+    let rafId = null, hover = false, scale = 0, target = 0, t = 0;
+    function tick() {
+        rafId = requestAnimationFrame(tick); t += 0.005; scale += (target - scale) * (hover ? ENTER_LERP : LEAVE_LERP);
+        if (scale > 0.5) feTurb.setAttribute('baseFrequency', `${(BASE_FX + Math.sin(t * 0.9) * DRIFT).toFixed(5)} ${(BASE_FY + Math.cos(t * 0.65) * DRIFT * 0.8).toFixed(5)}`);
+        feDisp.setAttribute('scale', scale.toFixed(3));
+        if (!hover && scale < 0.1) { feDisp.setAttribute('scale', '0'); feTurb.setAttribute('baseFrequency', `${BASE_FX} ${BASE_FY}`); cancelAnimationFrame(rafId); rafId = null; }
+    }
+    heroContainer.addEventListener('mouseenter', () => { hover = true; target = MAX_SCALE; heroImg.classList.add('water-active'); if (!rafId) tick(); });
+    heroContainer.addEventListener('mouseleave', () => { hover = false; target = 0; heroImg.classList.remove('water-active'); if (!rafId) tick(); });
+    heroContainer.addEventListener('mousemove', (e) => { if (!hover) return; target = MAX_SCALE + Math.min(MOVE_CAP, (Math.abs(e.movementX) + Math.abs(e.movementY)) * MOVE_COEF); });
+})();
+
+// ================= 4. 跑马灯 & 滚动监听 =================
+const hm = document.getElementById('hm'); hm.innerHTML += hm.innerHTML;
+const revealObserver = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.2 });
+document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
+const themeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            if (entry.target.getAttribute('data-bg') === 'light') {
+                document.body.style.backgroundColor = 'var(--white)'; document.body.style.color = 'var(--text-dark)'; document.body.classList.add('light-theme');
+            } else {
+                document.body.style.backgroundColor = 'var(--black)'; document.body.style.color = 'var(--text-light)'; document.body.classList.remove('light-theme');
+            }
+        }
+    });
+}, { threshold: 0.4 });
+document.querySelectorAll('section[data-bg], footer[data-bg]').forEach(el => themeObserver.observe(el));
+
+// ================= 5. 轮播逻辑 =================
+const sliderTrack = document.getElementById('sliderTrack'), sliderDots = document.querySelectorAll('.slider-dot');
+let currentSlide = 0;
+function goToSlide(index) {
+    currentSlide = index; sliderTrack.style.transform = `translateX(-${index * 100}%)`;
+    sliderDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+}
+sliderDots.forEach(dot => dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.index))));
+setInterval(() => goToSlide((currentSlide + 1) % sliderDots.length), 5000);
+
+// ================= 6. 作品模态框 & 图片轮播 =================
+const workModal = document.getElementById('workModal');
+const modalClose = document.getElementById('modalClose');
+const workItems = document.querySelectorAll('.work-item');
+const modalGallery = document.getElementById('modalGallery');
+
+const workData = {
+    zsea: {
+        tag: '护肤产品渲染', title: 'Z:SEA 海洋系列',
+        desc: '为Z:SEA海洋护肤系列打造全套3D渲染视觉，结合海洋元素的通透质感与深海蓝色调，精准还原产品材质光泽，完成从单品静帧到组合场景的全链路渲染输出，为品牌电商及投放渠道提供多规格视觉素材。',
+        client: 'Z:SEA品牌方', services: '3D建模 / 材质调试 / 商业布光 / 渲染输出', year: '2025',
+        images: ['images/modal-zsea-1.jpg', 'images/modal-zsea-2.jpg', 'images/modal-zsea-3.jpg', 'images/modal-zsea-4.jpg', 'images/modal-zsea-5.jpg', 'images/modal-zsea-6.jpg']
+    },
+    sdx: {
+        tag: '美妆产品渲染', title: 'SDX 泥膜系列',
+        desc: '针对SDX泥膜系列的质地特点，通过三维渲染还原泥膜的肌理与涂抹质感，以哑光陶土色为主视觉基调，搭配柔和漫射光源，突显产品的天然成分概念，输出适配详情页、主图及社媒投放的多尺寸渲染图。',
+        client: 'SDX美妆', services: '3D渲染 / 视觉创意 / 场景搭建', year: '2025',
+        images: ['images/modal-sdx-1.jpg', 'images/modal-sdx-2.jpg', 'images/modal-sdx-3.jpg', 'images/modal-sdx-4.jpg', 'images/modal-sdx-5.jpg']
+    },
+    grooming: {
+        tag: '个护产品渲染', title: '男士护理套装',
+        desc: '男士护理套装的商业三维可视化，以简约、高级的视觉风格为主，哑光金属质感与磨砂瓶身的材质精准还原，配合硬朗侧光烘托产品轮廓，整体呈现出都市精英的品牌调性，覆盖单品展示、套装组合及使用场景多类输出。',
+        client: '新锐个护品牌', services: '3D建模 / 商业渲染 / 视觉设计', year: '2024',
+        images: ['images/modal-groom-1.jpg', 'images/modal-groom-2.jpg', 'images/modal-groom-3.jpg', 'images/modal-groom-4.jpg', 'images/modal-groom-5.jpg']
+    },
+    grid1: {
+        tag: '产品可视化', title: '高端香水系列',
+        desc: '为高端香水品牌打造系列产品渲染，玻璃瓶体的折射、反射与透明度调试是本项目核心挑战，结合金属瓶盖的镜面质感，在暗调布光下突显香水的奢华定位，完整覆盖主图、详情页与节日礼盒场景。',
+        client: '高端香氛品牌', services: '3D建模 / 材质渲染 / 场景设计', year: '2025',
+        images: ['images/grid1-detail.jpg', 'images/grid1-detail-2.jpg', 'images/grid1-detail-3.jpg', 'images/grid1-detail-4.jpg', 'images/grid1-detail-5.jpg']
+    },
+    grid2: {
+        tag: 'UX/UI设计', title: '智能产品界面',
+        desc: '为智能美肤仪产品设计配套 App 界面，结合产品的科技定位，采用深色系界面配合数据可视化组件，在信息密度与视觉清晰度间寻找平衡，输出完整交互原型与设计规范文档。',
+        client: '智能美肤品牌', services: 'UX研究 / UI设计 / 原型交互', year: '2024',
+        images: ['images/grid2-detail.jpg', 'images/grid2-detail-2.jpg', 'images/grid2-detail-3.jpg', 'images/grid2-detail-4.jpg']
+    },
+    grid3: {
+        tag: '包装设计', title: '有机彩妆系列',
+        desc: '有机彩妆系列的全套包装视觉设计，从色彩体系、字体规范到印刷工艺建议，融入植物纹样与自然纸感肌理，配合三维包装渲染效果图，直观呈现最终上架效果，协助品牌完成批量打样决策。',
+        client: '有机彩妆品牌', services: '包装设计 / 3D效果渲染 / 品牌规范', year: '2025',
+        images: ['images/grid3-detail.jpg', 'images/grid3-detail-2.jpg', 'images/grid3-detail-3.jpg', 'images/grid3-detail-4.jpg', 'images/grid3-detail-5.jpg']
+    },
+    grid4: {
+        tag: '3D渲染', title: '个护产品概念设计',
+        desc: '以未来极简风格为方向的个护产品概念渲染，探索胶囊形态与悬浮光源的视觉融合，材质主攻半透明软橡胶与珠光喷涂，输出多角度概念静帧及品牌提案 PPT 配图，为新产品开发提供视觉参考。',
+        client: '产品开发团队', services: '概念渲染 / 3D可视化 / 提案设计', year: '2025',
+        images: ['images/grid4-detail.jpg', 'images/grid4-detail-2.jpg', 'images/grid4-detail-3.jpg', 'images/grid4-detail-4.jpg']
+    },
+    grid5: {
+        tag: '材质表现', title: '三维字体创意',
+        desc: '探索材质与字体的结合，运用玻璃、金属与霓虹灯光效，打造极具未来感的商业字体视觉，适用于海报主视觉与品牌活动视觉延展。',
+        client: '视觉实验项目', services: '3D排版 / 材质渲染', year: '2025',
+        images: ['images/grid5-detail.jpg', 'images/grid5-detail-2.jpg', 'images/grid5-detail-3.jpg', 'images/grid5-detail-4.jpg']
+    },
+    grid6: {
+        tag: '空间设计', title: '品牌快闪店概念',
+        desc: '为美妆品牌构思的线下快闪店空间3D概念渲染，结合品牌核心色调与流线型结构，打造沉浸式的美学体验空间。',
+        client: '品牌体验空间', services: '空间渲染 / 概念设计', year: '2025',
+        images: ['images/grid6-detail.jpg', 'images/grid6-detail-2.jpg', 'images/grid6-detail-3.jpg', 'images/grid6-detail-4.jpg']
+    },
+    split1: {
+        tag: '品牌设计', title: '个护品牌全案设计',
+        desc: '从品牌定位出发，完成品牌视觉系统（VI）搭建、产品包装设计、三维渲染及电商视觉全链路落地，输出品牌手册、主图套图、详情页模板，打造符合年轻群体审美的高端个护品牌视觉体系。',
+        client: '新兴个护品牌', services: 'VI设计 / 包装设计 / 3D渲染 / 电商视觉', year: '2024',
+        images: ['images/split1-detail.jpg', 'images/split1-detail-2.jpg', 'images/split1-detail-3.jpg', 'images/split1-detail-4.jpg', 'images/split1-detail-5.jpg']
+    },
+    split2: {
+        tag: '3D可视化', title: '美妆产品动画渲染',
+        desc: '为美妆新品打造全流程三维动画，从产品结构拆解、材质质感表现到动态光影设计，完整呈现产品核心卖点与高端质感，输出适用于电商首页 Banner、抖音投流及品牌发布会的多场景版本。',
+        client: '美妆新品牌', services: '3D动画 / 材质渲染 / 动态设计', year: '2025',
+        images: ['images/split2-detail.jpg', 'images/split2-detail-2.jpg', 'images/split2-detail-3.jpg', 'images/split2-detail-4.jpg', 'images/split2-detail-5.jpg', 'images/split2-detail-6.jpg']
+    }
+};
+
+let carouselImages = [];
+let currentCarouselIndex = 0;
+
+function buildCarousel(images) {
+    carouselImages = images || [];
+    currentCarouselIndex = 0;
+    modalGallery.innerHTML = '';
+    carouselImages.forEach((src, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'modal-slide' + (i === 0 ? ' active' : '');
+        const img = document.createElement('img');
+        img.src = src; img.alt = `展示图 ${i+1}`; img.className = 'modal-img';
+        slide.appendChild(img); modalGallery.appendChild(slide);
+    });
+    const dots = document.getElementById('carouselDots');
+    dots.innerHTML = '';
+    carouselImages.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        d.addEventListener('click', () => goToCarouselSlide(i));
+        dots.appendChild(d);
+    });
+    const thumbs = document.getElementById('carouselThumbs');
+    thumbs.innerHTML = '';
+    carouselImages.forEach((src, i) => {
+        const t = document.createElement('div');
+        t.className = 'carousel-thumb' + (i === 0 ? ' active' : '');
+        const img = document.createElement('img'); img.src = src; img.alt = `缩略 ${i+1}`;
+        t.appendChild(img);
+        t.addEventListener('click', () => goToCarouselSlide(i));
+        thumbs.appendChild(t);
+    });
+    updateCarouselUI();
+}
+
+function goToCarouselSlide(index) {
+    const slides = modalGallery.querySelectorAll('.modal-slide');
+    if (!slides.length) return;
+    slides[currentCarouselIndex].classList.remove('active');
+    slides[currentCarouselIndex].classList.add('leaving');
+    const prev = currentCarouselIndex;
+    setTimeout(() => slides[prev]?.classList.remove('leaving'), 460);
+    currentCarouselIndex = ((index % carouselImages.length) + carouselImages.length) % carouselImages.length;
+    slides[currentCarouselIndex].classList.add('active');
+    updateCarouselUI();
+}
+
+function updateCarouselUI() {
+    document.getElementById('carouselCounter').textContent = `${currentCarouselIndex + 1} / ${carouselImages.length}`;
+    document.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === currentCarouselIndex));
+    const thumbEls = document.querySelectorAll('.carousel-thumb');
+    thumbEls.forEach((t, i) => t.classList.toggle('active', i === currentCarouselIndex));
+    if (thumbEls[currentCarouselIndex]) thumbEls[currentCarouselIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+document.getElementById('carouselPrev').addEventListener('click', e => { e.stopPropagation(); goToCarouselSlide(currentCarouselIndex - 1); });
+document.getElementById('carouselNext').addEventListener('click', e => { e.stopPropagation(); goToCarouselSlide(currentCarouselIndex + 1); });
+
+let touchStartX = 0;
+modalGallery.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+modalGallery.addEventListener('touchend', e => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) goToCarouselSlide(currentCarouselIndex + (diff > 0 ? 1 : -1)); });
+
+modalGallery.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (carouselImages.length) openLightbox(carouselImages, currentCarouselIndex);
+});
+
+workModal.addEventListener('click', (e) => {
+    if (e.target === workModal) {
+        workModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+});
+
+document.querySelector('.modal-content').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+document.addEventListener('keydown', e => {
+    if (document.getElementById('lightbox').classList.contains('active')) {
+        if (e.key === 'ArrowLeft') { e.preventDefault(); currentLbIndex = (currentLbIndex - 1 + currentLbImages.length) % currentLbImages.length; updateLightbox(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); currentLbIndex = (currentLbIndex + 1) % currentLbImages.length; updateLightbox(); }
+        if (e.key === 'Escape') { e.preventDefault(); document.getElementById('lightbox').classList.remove('active'); }
+        return;
+    }
+    if (!workModal.classList.contains('active')) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goToCarouselSlide(currentCarouselIndex - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goToCarouselSlide(currentCarouselIndex + 1); }
+    if (e.key === 'Escape') { workModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
+});
+
+workItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const workKey = item.dataset.work;
+        const data = workData[workKey] || workData.zsea;
+        document.getElementById('modalTag').textContent = data.tag;
+        document.getElementById('modalTitle').textContent = data.title;
+        document.getElementById('modalDesc').textContent = data.desc;
+        document.getElementById('modalClient').textContent = data.client;
+        document.getElementById('modalServices').textContent = data.services;
+        document.getElementById('modalYear').textContent = data.year;
+        buildCarousel(data.images);
+        bindHoverTargets();
+        workModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+});
+
+modalClose.addEventListener('click', () => {
+    workModal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+});
+
+// ================= 7. 新增：高级交互式灯箱 (Lightbox) =================
+const lightbox = document.getElementById('lightbox');
+const lbZoomArea = document.getElementById('lbZoomArea');
+const lbImg = document.getElementById('lbImg');
+const lbClose = document.getElementById('lbClose');
+const lbPrev = document.getElementById('lbPrev');
+const lbNext = document.getElementById('lbNext');
+const lbCounter = document.getElementById('lbCounter');
+const lbScaleBadge = document.getElementById('lbScaleBadge');
+
+let currentLbImages = [];
+let currentLbIndex = 0;
+
+// 变换状态变量
+let currentX = 0, currentY = 0, currentScale = 1;
+let fitScale = 1; // 适配视口的初始缩放比
+let isDragging = false, hasDragged = false;
+let startX = 0, startY = 0, initialX = 0, initialY = 0;
+
+// 移动端多指操作追踪
+let pointers = [];
+let initialPinchDistance = 0, initialPinchScale = 1;
+let scaleBadgeTimeout;
+
+function openLightbox(imagesArray, index) {
+    currentLbImages = imagesArray;
+    currentLbIndex = index;
+    lightbox.classList.add('active');
+    // 等灯箱显示后再加载图片，确保能拿到视口尺寸
+    lbImg.src = '';
+    lbImg.onload = null;
+    const img = new Image();
+    img.onload = () => {
+        lbImg.src = img.src;
+        // 计算适配视口的初始缩放比（contain 效果），后续放大不模糊
+        const vw = window.innerWidth * 0.92;
+        const vh = window.innerHeight * 0.92;
+        fitScale = Math.min(vw / img.naturalWidth, vh / img.naturalHeight, 1);
+        currentX = 0; currentY = 0; currentScale = fitScale;
+        updateTransform(false);
+        lbCounter.textContent = `${currentLbIndex + 1} / ${currentLbImages.length}`;
+    };
+    img.src = imagesArray[index];
+}
+
+function updateLightbox() {
+    lbCounter.textContent = `${currentLbIndex + 1} / ${currentLbImages.length}`;
+    lbImg.src = '';
+    const img = new Image();
+    img.onload = () => {
+        lbImg.src = img.src;
+        const vw = window.innerWidth * 0.92;
+        const vh = window.innerHeight * 0.92;
+        fitScale = Math.min(vw / img.naturalWidth, vh / img.naturalHeight, 1);
+        currentX = 0; currentY = 0; currentScale = fitScale;
+        updateTransform(false);
+    };
+    img.src = currentLbImages[currentLbIndex];
+}
+
+function updateTransform(smooth = false) {
+    lbImg.style.transition = smooth ? 'transform 0.3s cubic-bezier(0.2, 0, 0.2, 1)' : 'none';
+    lbImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
+    // 显示相对于原始尺寸的缩放百分比
+    lbScaleBadge.textContent = Math.round((currentScale / fitScale) * 100) + '%';
+    lbScaleBadge.classList.add('visible');
+    clearTimeout(scaleBadgeTimeout);
+    scaleBadgeTimeout = setTimeout(() => lbScaleBadge.classList.remove('visible'), 1000);
+}
+
+function resetZoom(smooth = false) {
+    currentX = 0; currentY = 0; currentScale = fitScale;
+    updateTransform(smooth);
+}
+
+// ============== Pointer Events 核心逻辑 (兼容鼠标+触摸) ==============
+lbZoomArea.addEventListener('pointerdown', (e) => {
+    hasDragged = false;
+    pointers.push(e);
+    lbZoomArea.setPointerCapture(e.pointerId);
+
+    if (pointers.length === 1) {
+        // 单指/单鼠标拖拽
+        isDragging = true;
+        startX = e.clientX; 
+        startY = e.clientY;
+        initialX = currentX; 
+        initialY = currentY;
+    } else if (pointers.length === 2) {
+        // 双指捏合
+        isDragging = false;
+        initialPinchDistance = Math.hypot(
+            pointers[0].clientX - pointers[1].clientX,
+            pointers[0].clientY - pointers[1].clientY
+        );
+        initialPinchScale = currentScale;
+    }
+});
+
+lbZoomArea.addEventListener('pointermove', (e) => {
+    const index = pointers.findIndex(p => p.pointerId === e.pointerId);
+    if (index !== -1) pointers[index] = e;
+
+    if (pointers.length === 1 && isDragging) {
+        // 拖拽平移
+        const dx = pointers[0].clientX - startX;
+        const dy = pointers[0].clientY - startY;
+        // 设置拖拽阈值，防止点击误判为拖拽
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasDragged = true; 
+        
+        currentX = initialX + dx;
+        currentY = initialY + dy;
+        updateTransform();
+        
+    } else if (pointers.length === 2) {
+        // 捏合缩放
+        hasDragged = true;
+        const currentDistance = Math.hypot(
+            pointers[0].clientX - pointers[1].clientX,
+            pointers[0].clientY - pointers[1].clientY
+        );
+        const scaleDiff = currentDistance / initialPinchDistance;
+        // 限制缩放范围在 fitScale*0.5 到 10倍
+        currentScale = Math.max(fitScale * 0.5, Math.min(initialPinchScale * scaleDiff, 10));
+        updateTransform();
+    }
+});
+
+const handlePointerUp = (e) => {
+    pointers = pointers.filter(p => p.pointerId !== e.pointerId);
+    if (pointers.length < 2) initialPinchDistance = 0;
+
+    if (pointers.length === 1) {
+        // 如果松开一根手指，剩下的手指继续接管拖拽
+        isDragging = true;
+        startX = pointers[0].clientX; 
+        startY = pointers[0].clientY;
+        initialX = currentX; 
+        initialY = currentY;
+    } else if (pointers.length === 0) {
+        isDragging = false;
+    }
+};
+
+lbZoomArea.addEventListener('pointerup', handlePointerUp);
+lbZoomArea.addEventListener('pointercancel', handlePointerUp);
+
+// ============== 滚轮缩放 ==============
+lbZoomArea.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const zoomSensitivity = 0.1;
+    const delta = e.deltaY < 0 ? 1 : -1;
+    const targetScale = Math.max(fitScale * 0.5, Math.min(currentScale * (1 + delta * zoomSensitivity), 10));
+
+    // 计算鼠标相对于容器中心点的位置，使缩放向着鼠标位置进行
+    const rect = lbZoomArea.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+
+    const ratio = 1 - targetScale / currentScale;
+    currentX += (x - currentX) * ratio;
+    currentY += (y - currentY) * ratio;
+
+    currentScale = targetScale;
+    updateTransform();
+}, { passive: false });
+
+// ============== 双击重置 ==============
+lbZoomArea.addEventListener('dblclick', () => resetZoom(true));
+
+// ============== 点击事件 & 导航 ==============
+// 点击空白处关闭灯箱（必须是没有发生过拖拽的情况）
+lbZoomArea.addEventListener('click', (e) => {
+    if (e.target === lbZoomArea && !hasDragged) {
+        lightbox.classList.remove('active');
+    }
+});
+lbClose.addEventListener('click', (e) => { e.stopPropagation(); lightbox.classList.remove('active'); });
+
+lbPrev.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentLbIndex = (currentLbIndex - 1 + currentLbImages.length) % currentLbImages.length;
+    updateLightbox();
+});
+lbNext.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentLbIndex = (currentLbIndex + 1) % currentLbImages.length;
+    updateLightbox();
+});
+
+// ================= 8. 页面加载动画 =================
+(function () {
+    const loader = document.getElementById('page-loader');
+    const numEl = document.getElementById('loaderNum');
+    const barEl = document.getElementById('loaderBar');
+    if (!loader) return;
+    document.body.style.overflow = 'hidden';
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 12 + 4;
+        if (progress >= 100) { progress = 100; clearInterval(interval); }
+        numEl.textContent = Math.floor(progress);
+        barEl.style.width = progress + '%';
+        if (progress === 100) {
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+    }, 60);
+})();
+
+// ================= 9. 滚动进度条 =================
+const scrollBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    scrollBar.style.width = (window.scrollY / total * 100) + '%';
+}, { passive: true });
+
+// ================= 10. 导航栏滚动隐藏/显示 =================
+(function () {
+    const nav = document.querySelector('nav');
+    let lastY = 0;
+    window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        if (y > lastY && y > 120) {
+            nav.classList.add('nav-hidden');
+        } else {
+            nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+    }, { passive: true });
+})();
+
+// ================= 11. 光标文字（悬停作品卡片时显示 OPEN） =================
+const curLabel = document.getElementById('curLabel');
+document.querySelectorAll('.work-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+        document.body.classList.add('cursor-view');
+        document.body.classList.remove('hovering');
+    });
+    el.addEventListener('mouseleave', () => {
+        document.body.classList.remove('cursor-view');
+    });
+});
+// 同步光标文字位置
+document.addEventListener('mousemove', e => {
+    if (curLabel) { curLabel.style.left = e.clientX + 'px'; curLabel.style.top = e.clientY + 'px'; }
+});
+
+// ================= 12. 3D Tilt 卡片效果 =================
+document.querySelectorAll('.tilt-card').forEach(card => {
+    const shine = card.querySelector('.tilt-shine');
+    card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (e.clientX - cx) / (rect.width / 2);
+        const dy = (e.clientY - cy) / (rect.height / 2);
+        const rotX = -dy * 10;
+        const rotY = dx * 10;
+        card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.03)`;
+        if (shine) {
+            const px = ((e.clientX - rect.left) / rect.width) * 100;
+            const py = ((e.clientY - rect.top) / rect.height) * 100;
+            shine.style.background = `radial-gradient(circle at ${px}% ${py}%, rgba(255,255,255,0.13) 0%, transparent 65%)`;
+        }
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+    });
+});
+
+// ================= 13. Hero 鼠标视差 =================
+(function () {
+    const heroSection = document.querySelector('.section-hero');
+    const heroText = document.querySelector('.hero-text');
+    const heroImg = document.querySelector('.hero-img-container');
+    if (!heroSection || !heroText || !heroImg) return;
+    heroSection.addEventListener('mousemove', e => {
+        const rect = heroSection.getBoundingClientRect();
+        const cx = rect.width / 2, cy = rect.height / 2;
+        const dx = (e.clientX - rect.left - cx) / cx;
+        const dy = (e.clientY - rect.top - cy) / cy;
+        heroText.style.transform = `translate(${dx * 10}px, ${dy * 6}px)`;
+        heroImg.style.transform = `translate(${dx * -14}px, ${dy * -8}px)`;
+    });
+    heroSection.addEventListener('mouseleave', () => {
+        heroText.style.transform = '';
+        heroImg.style.transform = '';
+    });
+})();
+
+// ================= 14. 数字滚动计数动画 =================
+(function () {
+    const targets = [
+        { el: null, text: '4年+', num: 4, suffix: '年+' },
+        { el: null, text: '4K-8K 电影级', num: 8, suffix: 'K 电影级' },
+    ];
+    const statEls = document.querySelectorAll('.stat-item');
+    statEls.forEach(item => {
+        const valEl = item.querySelectorAll('span')[1];
+        if (!valEl) return;
+        const raw = valEl.textContent.trim();
+        const match = raw.match(/(\d+)/);
+        if (!match) return;
+        const finalNum = parseInt(match[1]);
+        const suffix = raw.replace(match[1], '');
+        valEl.dataset.finalNum = finalNum;
+        valEl.dataset.suffix = suffix;
+        valEl.textContent = '0' + suffix;
+    });
+    const countObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const valEl = entry.target.querySelectorAll('span')[1];
+            if (!valEl || valEl.dataset.counted) return;
+            valEl.dataset.counted = '1';
+            const finalNum = parseInt(valEl.dataset.finalNum);
+            const suffix = valEl.dataset.suffix;
+            if (isNaN(finalNum)) return;
+            let cur = 0;
+            const step = Math.ceil(finalNum / 30);
+            const timer = setInterval(() => {
+                cur = Math.min(cur + step, finalNum);
+                valEl.textContent = cur + suffix;
+                if (cur >= finalNum) clearInterval(timer);
+            }, 40);
+        });
+    }, { threshold: 0.5 });
+    statEls.forEach(el => countObserver.observe(el));
+})();
+
+// ================= 15. 磁吸按钮效果 =================
+document.querySelectorAll('.mag-btn').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+        const rect = btn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (e.clientX - cx) * 0.35;
+        const dy = (e.clientY - cy) * 0.35;
+        btn.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate(0,0)';
+    });
+});
+
+// ================= 16. Footer CTA 分字弹入动画 =================
+(function () {
+    const ctaEl = document.getElementById('ctaText');
+    if (!ctaEl) return;
+    const text = ctaEl.textContent;
+    ctaEl.innerHTML = text.split('').map((ch, i) =>
+        `<span class="split-char" style="transition-delay:${i * 0.08}s">${ch}</span>`
+    ).join('');
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                ctaEl.querySelectorAll('.split-char').forEach(s => s.classList.add('in'));
+            }
+        });
+    }, { threshold: 0.5 });
+    obs.observe(ctaEl);
+})();
+
+// ================= 17. 跑马灯悬停减速 =================
+(function () {
+    const track = document.getElementById('hm');
+    if (!track) return;
+    const marq = track.closest('.hero-marq');
+    if (!marq) return;
+    marq.addEventListener('mouseenter', () => { track.style.animationPlayState = 'paused'; track.style.opacity = '0.6'; });
+    marq.addEventListener('mouseleave', () => { track.style.animationPlayState = 'running'; track.style.opacity = '1'; });
+})();
+
+// ================= 18. 页面初始化 =================
+goToSlide(0);
+document.addEventListener('mouseleave', () => { cur.style.display = 'none'; ring.style.display = 'none'; });
+document.addEventListener('mouseenter', () => { cur.style.display = 'block'; ring.style.display = 'block'; });
+</script>
+</body>
+</html>
